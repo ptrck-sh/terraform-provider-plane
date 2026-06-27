@@ -1,0 +1,5 @@
+[env]
+# Machine/developer-specific variables. Copy to mise.local.toml (git-ignored).
+# Acceptance tests (mise run testacc) hit a live Plane instance:
+# PLANE_HOST   = "https://plane.local.j-p.cloud"
+# PLANE_API_KEY = "op://vault/item/field"
