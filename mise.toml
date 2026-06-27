@@ -1,0 +1,49 @@
+[env]
+# Add shared public environment variables and 1Password secret references here.
+# Acceptance tests read PLANE_HOST / PLANE_API_KEY at runtime; keep the API key
+# in mise.local.toml (git-ignored), not here.
+
+[tools]
+go = "1.26.4"
+pre-commit = "4.6.0"
+glab = "1.100.0"
+goreleaser = "2.16.0"
+"go:github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs" = "0.25.0"
+golangci-lint = "2.12.2"
+
+[hooks]
+enter = """
+pre-commit install --install-hooks 2>/dev/null || true
+[ -f mise.local.toml ] || cp mise.local.toml.example mise.local.toml
+"""
+
+[tasks.build]
+description = "Build the provider binary"
+run = "go build -o terraform-provider-plane ."
+
+[tasks.dev]
+description = "Build and install to local filesystem mirror (unpacked format) for tofu init"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+OS=$(go env GOOS)
+ARCH=$(go env GOARCH)
+VERSION="0.0.1"
+DIR="$HOME/.terraform.d/providers/registry.opentofu.org/ptrck-sh/plane/$VERSION/${OS}_${ARCH}"
+mkdir -p "$DIR"
+go build -o "$DIR/terraform-provider-plane_v$VERSION" .
+echo "Installed ptrck-sh/plane $VERSION (${OS}/${ARCH}) to $DIR"
+'''
+
+[tasks.test]
+description = "Run unit tests"
+run = "go test ./... -race -cover"
+
+[tasks.testacc]
+description = "Run acceptance tests against a live Plane instance (needs PLANE_HOST/PLANE_API_KEY)"
+env = { TF_ACC = "1" }
+run = "go test ./internal/provider/... -run TestAcc -v -timeout 30m"
+
+[tasks.docs]
+description = "Generate provider documentation"
+run = "tfplugindocs generate"

@@ -1,0 +1,24 @@
+# Build / release artifacts
+/dist/
+*.exe
+*.test
+*.out
+
+# Go workspace / module cache (kept local)
+/.cache/
+vendor/
+
+# Local tooling
+terraform-provider-plane
+
+# Terraform / OpenTofu local state from manual testing
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+crash.log
+
+# mise / secrets
+mise.local.toml
+.env
+.env.local

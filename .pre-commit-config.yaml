@@ -1,0 +1,49 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+        args: [--fix=auto]
+      - id: pretty-format-json
+        args: [--autofix, --no-sort-keys]
+      - id: check-toml
+      - id: check-json
+      - id: no-commit-to-branch
+        args: [--branch, main]
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+  - repo: local
+    hooks:
+      - id: proselint
+        name: proselint
+        entry: proselint
+        language: system
+        types: [markdown]
+      - id: gofmt
+        name: gofmt
+        entry: gofmt -l -w
+        language: system
+        types: [go]
+      - id: go-vet
+        name: go vet
+        entry: go vet ./...
+        language: system
+        types: [go]
+        pass_filenames: false
+      - id: alint-validate-config
+        name: alint validate config
+        entry: alint validate-config
+        language: system
+        pass_filenames: false
+        files: ^\.alint\.yml$
+      - id: alint
+        name: alint
+        entry: alint check
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [manual]

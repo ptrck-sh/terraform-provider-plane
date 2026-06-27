@@ -1,0 +1,7 @@
+{
+  "checks": {
+    "butterick.symbols.curly_quotes": false,
+    "butterick.symbols.ellipsis": false,
+    "misc.annotations": false
+  }
+}

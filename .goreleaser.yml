@@ -1,0 +1,71 @@
+---
+# GoReleaser config for a Terraform/OpenTofu provider. Produces the
+# registry-compatible artifact set (per-platform zips, SHA256SUMS, GPG
+# signature, and the registry manifest) consumed identically by the OpenTofu
+# Registry and the Terraform Registry.
+#
+# Tagged releases require these CI variables: GPG_FINGERPRINT (and an imported
+# private key) for signing, and GITLAB_TOKEN (CI job token) for the release.
+# Snapshot builds on branches skip publishing; run them with `--skip=sign` if
+# no GPG key is present in the runner.
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    flags:
+      - -trimpath
+    ldflags:
+      - "-s -w -X main.version={{ .Version }}"
+    goos:
+      - linux
+      - darwin
+      - windows
+      - freebsd
+    goarch:
+      - amd64
+      - "386"
+      - arm
+      - arm64
+    ignore:
+      - goos: darwin
+        goarch: "386"
+    binary: "{{ .ProjectName }}_v{{ .Version }}"
+
+archives:
+  - formats: [zip]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: "{{ .ProjectName }}_{{ .Version }}_SHA256SUMS"
+  algorithm: sha256
+  extra_files:
+    - glob: terraform-registry-manifest.json
+      name_template: "{{ .ProjectName }}_{{ .Version }}_manifest.json"
+
+signs:
+  - artifacts: checksum
+    args:
+      - --batch
+      - --local-user
+      - "{{ .Env.GPG_FINGERPRINT }}"
+      - --output
+      - "${signature}"
+      - --detach-sign
+      - "${artifact}"
+
+release:
+  gitlab:
+    owner: ptrck-sh
+    name: terraform-provider-plane
+  extra_files:
+    - glob: terraform-registry-manifest.json
+      name_template: "{{ .ProjectName }}_{{ .Version }}_manifest.json"
+
+changelog:
+  disable: true
