@@ -7,7 +7,7 @@
 go = "1.26.4"
 pre-commit = "4.6.0"
 glab = "1.100.0"
-goreleaser = "2.16.0"
+goreleaser = "2.17.0"
 "go:github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs" = "0.25.0"
 golangci-lint = "2.12.2"
 
