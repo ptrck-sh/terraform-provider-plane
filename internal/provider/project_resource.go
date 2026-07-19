@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -56,11 +58,15 @@ func (r *projectResource) Metadata(_ context.Context, req resource.MetadataReque
 }
 
 func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+	// These mirror server-side defaults. Omitting one in config must leave the
+	// remote value untouched, so they keep prior state instead of planning as
+	// unknown on every refresh.
 	computedBool := func(desc string) schema.BoolAttribute {
 		return schema.BoolAttribute{
 			MarkdownDescription: desc,
 			Optional:            true,
 			Computed:            true,
+			PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
 		}
 	}
 
@@ -89,8 +95,10 @@ func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"description": schema.StringAttribute{
-				MarkdownDescription: "Project description.",
+				MarkdownDescription: "Project description. Omit to leave whatever Plane already has; set to \"\" to clear it.",
 				Optional:            true,
+				Computed:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"project_lead": schema.StringAttribute{
 				MarkdownDescription: "User UUID of the project lead.",
@@ -109,16 +117,19 @@ func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				MarkdownDescription: "Months of inactivity after which work items auto-archive (0 disables).",
 				Optional:            true,
 				Computed:            true,
+				PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
 			},
 			"close_in": schema.Int64Attribute{
 				MarkdownDescription: "Months of inactivity after which work items auto-close (0 disables).",
 				Optional:            true,
 				Computed:            true,
+				PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
 			},
 			"timezone": schema.StringAttribute{
 				MarkdownDescription: "Project timezone (IANA name).",
 				Optional:            true,
 				Computed:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"workspace": schema.StringAttribute{
 				MarkdownDescription: "UUID of the owning workspace.",
@@ -154,9 +165,12 @@ func (r *projectResource) Configure(_ context.Context, req resource.ConfigureReq
 // toAPI builds an API project payload from the plan model.
 func (m projectResourceModel) toAPI() client.Project {
 	p := client.Project{
-		Name:        m.Name.ValueString(),
-		Identifier:  m.Identifier.ValueString(),
-		Description: m.Description.ValueString(),
+		Name:       m.Name.ValueString(),
+		Identifier: m.Identifier.ValueString(),
+	}
+	if !m.Description.IsNull() && !m.Description.IsUnknown() {
+		v := m.Description.ValueString()
+		p.Description = &v
 	}
 	if !m.ProjectLead.IsNull() && !m.ProjectLead.IsUnknown() {
 		v := m.ProjectLead.ValueString()
@@ -206,7 +220,7 @@ func (m *projectResourceModel) applyAPI(p *client.Project) {
 	m.ID = types.StringValue(p.ID)
 	m.Name = types.StringValue(p.Name)
 	m.Identifier = types.StringValue(p.Identifier)
-	m.Description = types.StringValue(p.Description)
+	m.Description = stringPtrToValue(p.Description)
 	m.ProjectLead = stringPtrToValue(p.ProjectLead)
 	m.DefaultAssignee = stringPtrToValue(p.DefaultAssignee)
 	m.ModuleView = boolPtrToValue(p.ModuleView)
