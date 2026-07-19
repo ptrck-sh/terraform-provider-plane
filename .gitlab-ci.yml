@@ -28,10 +28,8 @@ go:build:
     GITLAB_TOKEN: $CI_JOB_TOKEN
     GIT_DEPTH: 0
   before_script:
-    - |
-      if [ -n "${GPG_PRIVATE_KEY}" ]; then
-        echo "${GPG_PRIVATE_KEY}" | gpg --batch --import
-      fi
+    # GPG_PRIVATE_KEY is a file-type variable, so it holds a path, not the key.
+    - '[ -n "$GPG_PRIVATE_KEY" ] && gpg --batch --import "$GPG_PRIVATE_KEY" || true'
   script:
     - |
       if [ -n "$CI_COMMIT_TAG" ]; then
@@ -66,8 +64,12 @@ release:github:
       --repo ptrck-sh/terraform-provider-plane
       --title "$CI_COMMIT_TAG"
       --notes ""
+  # The GitHub mirror repo is not wired yet, so this must never block a tag
+  # release. Opt-in once the mirror exists.
   rules:
-    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_TAG && $GITHUB_TOKEN
+      when: manual
+      allow_failure: true
 
 # Acceptance tests hit a live Plane instance and need PLANE_HOST / PLANE_API_KEY.
 # They are never run unauthenticated on every push. Manual trigger only, and
