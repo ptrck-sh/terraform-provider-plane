@@ -71,6 +71,11 @@ release:github:
   before_script:
     - apk add --no-cache github-cli
   script:
+    # GoReleaser lists the registry manifest in SHA256SUMS and uploads it via
+    # release.extra_files, but never writes it into dist/ under that name, so
+    # the glob below has nothing to match. Materialise it first.
+    - cp terraform-registry-manifest.json
+      "dist/terraform-provider-plane_${CI_COMMIT_TAG}_manifest.json"
     - gh release create "$CI_COMMIT_TAG"
       dist/terraform-provider-plane_*_SHA256SUMS
       dist/terraform-provider-plane_*_SHA256SUMS.sig
@@ -79,12 +84,8 @@ release:github:
       --repo ptrck-sh/terraform-provider-plane
       --title "$CI_COMMIT_TAG"
       --notes ""
-  # The GitHub mirror repo is not wired yet, so this must never block a tag
-  # release. Opt-in once the mirror exists.
   rules:
-    - if: $CI_COMMIT_TAG && $GITHUB_TOKEN
-      when: manual
-      allow_failure: true
+    - if: $CI_COMMIT_TAG
 
 # Acceptance tests hit a live Plane instance and need PLANE_HOST / PLANE_API_KEY.
 # They are never run unauthenticated on every push. Manual trigger only, and
