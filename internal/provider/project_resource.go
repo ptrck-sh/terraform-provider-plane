@@ -220,7 +220,14 @@ func (m *projectResourceModel) applyAPI(p *client.Project) {
 	m.ID = types.StringValue(p.ID)
 	m.Name = types.StringValue(p.Name)
 	m.Identifier = types.StringValue(p.Identifier)
-	m.Description = stringPtrToValue(p.Description)
+	// Plane returns "" rather than null for an unset description, and the
+	// attribute is Computed, so "" must round-trip as "" instead of collapsing
+	// to null the way genuinely-nullable fields below do.
+	if p.Description == nil {
+		m.Description = types.StringValue("")
+	} else {
+		m.Description = types.StringValue(*p.Description)
+	}
 	m.ProjectLead = stringPtrToValue(p.ProjectLead)
 	m.DefaultAssignee = stringPtrToValue(p.DefaultAssignee)
 	m.ModuleView = boolPtrToValue(p.ModuleView)
