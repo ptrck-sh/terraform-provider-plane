@@ -22,7 +22,7 @@ include:
 go:build:
   stage: build
   image:
-    name: goreleaser/goreleaser:v2.16.0
+    name: goreleaser/goreleaser:v2.17.0
     entrypoint: [""]
   variables:
     GITLAB_TOKEN: $CI_JOB_TOKEN
@@ -49,7 +49,7 @@ go:build:
 
 release:github:
   stage: release
-  image: alpine:3.21
+  image: alpine:3.24
   needs:
     - job: go:build
       artifacts: true
