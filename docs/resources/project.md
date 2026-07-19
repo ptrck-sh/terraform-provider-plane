@@ -39,7 +39,7 @@ resource "plane_project" "platform" {
 - `close_in` (Number) Months of inactivity after which work items auto-close (0 disables).
 - `cycle_view` (Boolean) Whether the Cycles feature is enabled.
 - `default_assignee` (String) User UUID of the default work-item assignee.
-- `description` (String) Project description.
+- `description` (String) Project description. Omit to leave whatever Plane already has; set to "" to clear it.
 - `intake_view` (Boolean) Whether the Intake feature is enabled.
 - `issue_views_view` (Boolean) Whether the Views feature is enabled.
 - `module_view` (Boolean) Whether the Modules feature is enabled.
