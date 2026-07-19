@@ -28,8 +28,21 @@ go:build:
     GITLAB_TOKEN: $CI_JOB_TOKEN
     GIT_DEPTH: 0
   before_script:
+    # GoReleaser refuses to run when both GITHUB_TOKEN and GITLAB_TOKEN are set.
+    # The GitHub token belongs to release:github, not to this job.
+    - unset GITHUB_TOKEN
     # GPG_PRIVATE_KEY is a file-type variable, so it holds a path, not the key.
-    - '[ -n "$GPG_PRIVATE_KEY" ] && gpg --batch --import "$GPG_PRIVATE_KEY" || true'
+    # gpg 2.x needs a running agent to import a secret key, and the goreleaser
+    # image starts without one. Fail loudly here rather than at the sign step.
+    - |
+      if [ -n "$CI_COMMIT_TAG" ]; then
+        GNUPGHOME="$(mktemp -d)"
+        export GNUPGHOME
+        chmod 700 "$GNUPGHOME"
+        gpgconf --launch gpg-agent
+        gpg --batch --pinentry-mode loopback --import "$GPG_PRIVATE_KEY"
+        gpg --batch --list-secret-keys "$GPG_FINGERPRINT"
+      fi
   script:
     - |
       if [ -n "$CI_COMMIT_TAG" ]; then
