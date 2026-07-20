@@ -13,7 +13,7 @@ type Project struct {
 	ID          string  `json:"id,omitempty"`
 	Name        string  `json:"name,omitempty"`
 	Identifier  string  `json:"identifier,omitempty"`
-	Description string  `json:"description"`
+	Description *string `json:"description,omitempty"`
 	ProjectLead *string `json:"project_lead"`
 	// DefaultAssignee is the default work-item assignee (user UUID).
 	DefaultAssignee *string `json:"default_assignee"`
