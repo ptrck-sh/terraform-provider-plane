@@ -25,16 +25,9 @@ builds:
     goos:
       - linux
       - darwin
-      - windows
-      - freebsd
     goarch:
       - amd64
-      - "386"
-      - arm
       - arm64
-    ignore:
-      - goos: darwin
-        goarch: "386"
     binary: "{{ .ProjectName }}_v{{ .Version }}"
 
 archives:
@@ -52,6 +45,8 @@ signs:
   - artifacts: checksum
     args:
       - --batch
+      - --pinentry-mode
+      - loopback
       - --local-user
       - "{{ .Env.GPG_FINGERPRINT }}"
       - --output
