@@ -5,7 +5,7 @@
 
 [tools]
 go = "1.26.5"
-pre-commit = "4.6.0"
+pre-commit = "4.6.1"
 glab = "1.100.0"
 goreleaser = "2.17.0"
 "go:github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs" = "0.25.0"
