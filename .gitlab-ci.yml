@@ -22,7 +22,7 @@ include:
 go:build:
   stage: build
   image:
-    name: goreleaser/goreleaser:v2.17.0
+    name: goreleaser/goreleaser:v2.17.1
     entrypoint: [""]
   variables:
     GITLAB_TOKEN: $CI_JOB_TOKEN
