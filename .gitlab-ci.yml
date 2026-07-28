@@ -6,13 +6,13 @@ stages:
   - release
 
 include:
-  - component: $CI_SERVER_FQDN/ptrck-sh/templates/ci-templates/base@0.22.2
+  - component: $CI_SERVER_FQDN/ptrck-sh/templates/ci-templates/base@0.23.0
     inputs:
       runner_tags: [homelab]
-  - component: $CI_SERVER_FQDN/ptrck-sh/templates/ci-templates/pre-commit@0.22.2
-  - component: $CI_SERVER_FQDN/ptrck-sh/templates/ci-templates/security@0.22.2
-  - component: $CI_SERVER_FQDN/ptrck-sh/templates/ci-templates/alint@0.22.2
-  - component: $CI_SERVER_FQDN/ptrck-sh/templates/ci-templates/go@0.22.2
+  - component: $CI_SERVER_FQDN/ptrck-sh/templates/ci-templates/pre-commit@0.23.0
+  - component: $CI_SERVER_FQDN/ptrck-sh/templates/ci-templates/security@0.23.0
+  - component: $CI_SERVER_FQDN/ptrck-sh/templates/ci-templates/alint@0.23.0
+  - component: $CI_SERVER_FQDN/ptrck-sh/templates/ci-templates/go@0.23.0
     inputs:
       gofmt_dirs: "main.go internal/"
 
