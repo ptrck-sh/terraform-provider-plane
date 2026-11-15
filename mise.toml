@@ -4,7 +4,7 @@
 # in mise.local.toml (git-ignored), not here.
 
 [tools]
-go = "1.26.11"
+go = "1.27.4"
 pre-commit = "4.6.2"
 glab = "1.100.0"
 goreleaser = "2.20.2"
